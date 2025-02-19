@@ -56,16 +56,13 @@ app.post("/api/students", async (req, res) => {
   }
 });
 
-app.get("/api/students", (req, res) => {
-  Student.find({})
-    .then((students) => {
-      console.log("Retrieved students ->", students);
-      res.json(students);
-    })
-    .catch((error) => {
-      console.error("Error while retrieving students ->", error);
-      res.status(500).json({ error: "Failed to retrieve students" });
-    });
+app.get("/api/students", async (req, res) => {
+  try {
+    const students = await Student.find({}).populate("cohort");
+    res.status(200).json(students);
+  } catch (error) {
+    res.status(500).json({ message: "Error:" + error });
+  }
 });
 
 app.get("/api/students/cohort/:cohortId", async (req, res) => {
@@ -82,7 +79,7 @@ app.get("/api/students/cohort/:cohortId", async (req, res) => {
 app.get("/api/students/:studentId", async (req, res) => {
   try {
     const studentId = req.params.studentId;
-    const student = await Student.findById(studentId);
+    const student = await Student.findById(studentId).populate("cohort");
     res.status(200).json(student);
   } catch (error) {
     res.status(500).json({ message: "Error:" + error });
